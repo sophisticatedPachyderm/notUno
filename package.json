@@ -1,0 +1,19 @@
+{
+  "name": "not_uno",
+  "version": "1.0.0",
+  "description": "definitely not uno",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sophisticatedPachyderm/notUno.git"
+  },
+  "author": "Duke Pham, Steven Chung, Evan Moncuso",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sophisticatedPachyderm/"
+  },
+  "homepage": "https://github.com/sophisticatedPachyderm/"
+}
