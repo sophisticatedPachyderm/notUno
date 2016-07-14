@@ -34,7 +34,7 @@ module.exports = {
       // this should be a 1x1 array
   },
 
-  retrieveScore: function(username) {
+  retrieveScore: function (username) {
     db.query(
       `
       SELECT
@@ -43,11 +43,14 @@ module.exports = {
         users
       WHERE
         username = ${username};
-      `, function(err, rows) {
+      `, function (err, rows) {
       if (err) {
         console.log('err on retrieveScore query', err);
       } else {
         console.log(rows, ' score retrieval success');
+        callback(rows);
+
+        // array
       }
     });
 
@@ -68,7 +71,7 @@ module.exports = {
             VALUES
               ('${username}', '${hash}', '${salt}', 0);
             `,
-            function(err, rows) {
+            function (err, rows) {
               if (err) {
                 console.log('error on DB insert' + err);
               } else {
@@ -82,7 +85,52 @@ module.exports = {
         }
       });
     });
+
     // function to store new user with raw sql
     // presumably, this is for the initial signup to store a given pass
-  }
+  },
+
+  doesUserExist: function (username, callback) {
+    db.query(
+      `
+      SELECT
+        *
+      FROM
+        users
+      WHERE
+        username = ${username};
+      `, function (err, rows) {
+        if (err) {
+          console.log('err on user retrieval query', err);
+        } else {
+          console.log(rows, ' user retrieval success');
+          callback(rows[0]); // should be a boolean
+        }
+      });
+
+    // array would be empty if username doesn't have any records
+  },
+
+  retrieveTopTenScores: function (callback) {
+    db.query(
+      `
+      SELECT
+        username, scoring
+      FROM
+        users
+      ORDER BY scoring desc
+      limit 10;
+      `, function (err, rows) {
+      if (err) {
+        console.log('err on retrieveScore query', err);
+      } else {
+        console.log(rows, ' score retrieval success');
+        callback(rows);
+      }
+    });
+
+    // simple score retrieval
+    // for simplicity, no pass check to retrieve score since we'll use for leaderboards
+  },
+
 };

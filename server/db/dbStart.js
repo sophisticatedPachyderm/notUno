@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
   database: 'notUno',
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
   if (err) {
     console.log('err ' + err);
     return;
