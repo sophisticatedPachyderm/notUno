@@ -34,7 +34,7 @@ module.exports = {
       // this should be a 1x1 array
   },
 
-  retrieveScore: function(username) {
+  retrieveScore: function (username) {
     db.query(
       `
       SELECT
@@ -68,7 +68,7 @@ module.exports = {
             VALUES
               ('${username}', '${hash}', '${salt}', 0);
             `,
-            function(err, rows) {
+            function (err, rows) {
               if (err) {
                 console.log('error on DB insert' + err);
               } else {
@@ -82,7 +82,31 @@ module.exports = {
         }
       });
     });
+
     // function to store new user with raw sql
     // presumably, this is for the initial signup to store a given pass
-  }
+  },
+
+  doesUserExist: function (username) {
+    var userNameExistence = db.query(
+      `
+      SELECT
+        *
+      FROM
+        users
+      WHERE
+        username = ${username};
+      `, function (err, rows) {
+        if (err) {
+          console.log('err on hash retrieval query', err);
+        } else {
+          console.log(rows, ' hash retrieval success');
+        }
+      });
+
+    return (userNameExistence.length < 1) ? false : true;
+
+    // array would be empty if username doesn't have any records
+  },
+
 };
