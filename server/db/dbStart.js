@@ -3,11 +3,11 @@ var sql = require('mysql');
 var connection = mysql.createConnection({
   host: 'localhost', // could be Docker if we figure it out
   user: 'root',
-  password: ''
-  database: 'notUno'
+  password: '',
+  database: 'notUno',
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
   if (err) {
     console.log('err ' + err);
     return;
