@@ -7,6 +7,8 @@ var passport = require('passport');
 var userRoutes = require('./routes/user');
 var gameRoutes = require('./routes/game');
 
+var database = require('./db/dbStart');
+
 var app = express();
 //--------- SETUP MIDDLEWARE ----------------------//
 app.use(morgan('dev'));
