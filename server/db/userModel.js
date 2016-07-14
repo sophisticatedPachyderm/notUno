@@ -43,11 +43,14 @@ module.exports = {
         users
       WHERE
         username = ${username};
-      `, function(err, rows) {
+      `, function (err, rows) {
       if (err) {
         console.log('err on retrieveScore query', err);
       } else {
         console.log(rows, ' score retrieval success');
+        callback(rows);
+
+        // array
       }
     });
 
@@ -87,8 +90,8 @@ module.exports = {
     // presumably, this is for the initial signup to store a given pass
   },
 
-  doesUserExist: function (username) {
-    var userNameExistence = db.query(
+  doesUserExist: function (username, callback) {
+    db.query(
       `
       SELECT
         *
@@ -98,15 +101,36 @@ module.exports = {
         username = ${username};
       `, function (err, rows) {
         if (err) {
-          console.log('err on hash retrieval query', err);
+          console.log('err on user retrieval query', err);
         } else {
-          console.log(rows, ' hash retrieval success');
+          console.log(rows, ' user retrieval success');
+          callback(rows[0]); // should be a boolean
         }
       });
 
-    return (userNameExistence.length < 1) ? false : true;
-
     // array would be empty if username doesn't have any records
+  },
+
+  retrieveTopTenScores: function (callback) {
+    db.query(
+      `
+      SELECT
+        username, scoring
+      FROM
+        users
+      ORDER BY scoring desc
+      limit 10;
+      `, function (err, rows) {
+      if (err) {
+        console.log('err on retrieveScore query', err);
+      } else {
+        console.log(rows, ' score retrieval success');
+        callback(rows);
+      }
+    });
+
+    // simple score retrieval
+    // for simplicity, no pass check to retrieve score since we'll use for leaderboards
   },
 
 };
