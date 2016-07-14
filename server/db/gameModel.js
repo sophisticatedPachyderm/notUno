@@ -2,29 +2,31 @@ var mysql = require('mysql');
 var db = require('./dbStart.js');
 
 module.exports = {
-  getGame: function(gameId) {
+  getGame: function(gameId, res) {
     db.query(
       `
       SELECT
-        games.*
-        users.username 
+        games.*,
+        users.username
       FROM
         games
       INNER JOIN
-        gamesByUsers
+        gamesByUser
       INNER JOIN
         users
       WHERE
-        games.id = '${gameId}';
+        games.gameId = '${gameId}'
       AND
-        games.id = gamesByUsers.gameId
+        games.gameId = gamesByUser.gameId
       AND
-        users.id = gamesByUsers.userId
+        users.userId = gamesByUser.userId
       `, function(err, rows) {
       if (err) {
         console.log('err on getGame query', err);
       } else {
         console.log(rows, 'getGame success');
+        res.send(rows);
+        res.end();
       }
     });
 
@@ -39,11 +41,11 @@ module.exports = {
       FROM
         games
       INNER JOIN
-        gamesByUsers
+        gamesByUser
       WHERE
-        gamesByUsers.userId = '${userId}';
+        gamesByUser.userId = '${userId}';
       AND
-        games.id = gamesByUsers.gameId
+        games.gameId = gamesByUser.gameId
       AND
         games.complete = '${false}'
       `, function(err, rows) {
@@ -51,6 +53,8 @@ module.exports = {
         console.log('err on getMyGames query', err);
       } else {
         console.log(rows, 'getMyGames success');
+        res.send('temp');
+        res.end();
       }
     });
     // retrieve all of a users ongoing games
@@ -71,7 +75,7 @@ module.exports = {
         direction = '${direction}',
         complete = '${complete}'
       WHERE
-        id = '${gameId}';
+        gameId = '${gameId}';
       `, function(err, rows) {
       if (err) {
         console.log('err on updateGame', err);
@@ -82,20 +86,22 @@ module.exports = {
     // assumes client will have access to gameId, drawDeck, and userPosition (i.e. p0, p1, p2, p3)
   },
 
-  completeGame: function(userId, score) {
+  completeGame: function(userId, score, res) {
     db.query(
       `
       UPDATE
         users
       SET
-        score = score + '${score}',
+        score = (score + ${score})
       WHERE
-        userId = '${userId}';
+        userId = ${userId};
       `, function(err, rows) {
       if (err) {
         console.log('err on completeGame', err);
       } else {
         console.log(rows, 'completeGame success');
+        res.send('complete');
+        res.end();
       }
     });
   }
