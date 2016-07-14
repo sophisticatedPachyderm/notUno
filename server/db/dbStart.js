@@ -1,10 +1,12 @@
 var sql = require('mysql');
+var secrets = require('./../secrets.js');
 
 var connection = mysql.createConnection({
-  host: 'localhost', // could be Docker if we figure it out
-  user: 'root',
-  password: ''
-  database: 'notUno'
+  host: secrets.url, // could be Docker if we figure it out
+  port: secrets.port,
+  user: secrets.username,
+  password: secrets.password,
+  database: 'notUno',
 });
 
 connection.connect(function(err) {
