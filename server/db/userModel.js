@@ -25,7 +25,6 @@ module.exports = {
               response.send(res);
               response.end();
               return;
-              // boolean
             }
           });
         }

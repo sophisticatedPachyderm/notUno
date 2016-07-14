@@ -1,4 +1,4 @@
-var sql = require('mysql');
+var mysql = require('mysql');
 var secrets = require('./../secrets.js');
 
 var connection = mysql.createConnection({

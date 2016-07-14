@@ -1,4 +1,5 @@
 var router = require('express').Router();
+var db = require('./../db/gameModel.js');
 
 router.get('/wait', function(req, res) {
   console.log('GET request for /api/game/wait');
@@ -7,7 +8,7 @@ router.get('/wait', function(req, res) {
 
 router.get('/allgames', function(req, res) {
   console.log('GET request for /api/game/allgames');
-  res.end();
+  db.getGame(1, res);
 });
 
 router.post('/myturn', function(req, res) {
