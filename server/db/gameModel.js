@@ -2,6 +2,7 @@ var mysql = require('mysql');
 var db = require('./dbStart.js');
 
 module.exports = {
+  // no errors, test again with join table
   getGame: function(gameId, res) {
     db.query(
       `
@@ -19,7 +20,7 @@ module.exports = {
       AND
         games.gameId = gamesByUser.gameId
       AND
-        users.userId = gamesByUser.userId
+        users.userId = gamesByUser.userId;
       `, function(err, rows) {
       if (err) {
         console.log('err on getGame query', err);
@@ -33,7 +34,8 @@ module.exports = {
     // game retrieval
   },
 
-  getMyGames: function(userId) {
+  getMyGames: function(userId, res) {
+    // no errors, test again when we have data in the join table
     db.query(
       `
       SELECT
@@ -43,11 +45,11 @@ module.exports = {
       INNER JOIN
         gamesByUser
       WHERE
-        gamesByUser.userId = '${userId}';
+        gamesByUser.userId = '${userId}'
       AND
         games.gameId = gamesByUser.gameId
       AND
-        games.complete = '${false}'
+        games.gameComplete = '${false}';
       `, function(err, rows) {
       if (err) {
         console.log('err on getMyGames query', err);
@@ -63,6 +65,7 @@ module.exports = {
   },
 
   updateGame: function(userId, gameId, playDeck, drawDeck, userHand, userPosition, currentPlayer, direction, complete) {
+    // NOT TESTED YET
     db.query(
       `
       UPDATE
@@ -87,6 +90,7 @@ module.exports = {
   },
 
   completeGame: function(userId, score, res) {
+    // tested, not assigned to an endpoint
     db.query(
       `
       UPDATE

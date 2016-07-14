@@ -8,7 +8,7 @@ router.get('/wait', function(req, res) {
 
 router.get('/allgames', function(req, res) {
   console.log('GET request for /api/game/allgames');
-  db.completeGame(1, 1200, res);
+  db.getGame(1, res);
 });
 
 router.post('/myturn', function(req, res) {
