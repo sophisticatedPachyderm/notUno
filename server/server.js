@@ -3,7 +3,7 @@ var parser = require('body-parser');
 var morgan = require('morgan');
 var bcrypt = require('bcrypt-nodejs');
 var passport = require('passport');
-
+var LocalStrategy = require('passport-local').Strategy;
 var userRoutes = require('./routes/user');
 var gameRoutes = require('./routes/game');
 
@@ -13,6 +13,8 @@ var app = express();
 //--------- SETUP MIDDLEWARE ----------------------//
 app.use(morgan('dev'));
 app.use(parser.json());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/api/user', userRoutes);
 app.use('/api/game', gameRoutes);
 

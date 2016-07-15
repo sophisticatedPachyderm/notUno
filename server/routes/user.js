@@ -1,5 +1,5 @@
 var router = require('express').Router();
-var db = require('./../db/userModel.js');
+var db = require('./../db/userController.js');
 
 router.get('/chat', function(req, res) {
   console.log('GET request for /api/user/chat');
