@@ -11,63 +11,64 @@ class Card {
 
 // create a new deck for the game
 let makeNewDeck = () => {
-	let deck = [];
+  let deck = [];
 
-	let colors = ['red', 'green', 'blue', 'yellow'];
+  let colors = ['red', 'green', 'blue', 'yellow'];
 
-	let deckBreakdown = {
-		0: 1,
-		1: 2,
-		2: 2,
-		3: 2,
-		4: 2,
-		5: 2,
-		6: 2,
-		7: 2,
-		8: 2,
-		9: 2,
-		skip: 2,
-		reverse: 2,
-		takeTwo: 2,
-	};
+  let deckBreakdown = {
+    0: 1,
+    1: 2,
+    2: 2,
+    3: 2,
+    4: 2,
+    5: 2,
+    6: 2,
+    7: 2,
+    8: 2,
+    9: 2,
+    skip: 2,
+    reverse: 2,
+    takeTwo: 2,
+  };
 
-	let colorless = {
-		wild: 4,
-		takeFour: 4
-	};
+  let colorless = {
+    wild: 4,
+    takeFour: 4,
+  };
 
-	for (let color of colors) {
-		for (let type in deckBreakdown) {
-			for (let i=0; i < deckBreakdown[type]; i++) {
-				deck.push(new Card(type, color));
-			}
-		}
-	}
+  for (let color of colors) {
+    for (let type in deckBreakdown) {
+      for (let i = 0; i < deckBreakdown[type]; i++) {
+        deck.push(new Card(type, color));
+      }
+    }
+  }
 
-	for (let each in colorless) {
-		for (let i=0; i < colorless[each]; i++) {
-			deck.push(new Card(each, true));
-		}
-	}
+  for (let each in colorless) {
+    for (let i = 0; i < colorless[each]; i++) {
+      deck.push(new Card(each, true));
+    }
+  }
 
-	deck = _.shuffle(deck);
+  deck = _.shuffle(deck);
 
   return deck;
 };
 
 let dealCards = (deck, players) => {
   // deals each player 7 cards
-  for (let i=0; i<7; i++) {
+  for (let i = 0; i < 7; i++) {
     for (let player of players) {
       //the 'top' of the deck will be the card at the highest index
       player.hand.push(deck.pop());
     }
   }
+
   // add a card to the discardPile
 
   discardPile.push(deck.pop());
   return true;
-}
+};
 
 // --------------------- turn by turn actions -------------------- //
 
@@ -77,8 +78,9 @@ let takeCard = (player, numberOfCards) => {
   for (var card = 0; card < numberOfCards; card++) {
     player.hand.push(deck.pop());
   }
+
   return true;
-}
+};
 
 // player discard
 let layDownCard = (player, cardIndex) => {
@@ -91,7 +93,7 @@ let layDownCard = (player, cardIndex) => {
   discardPile.push(discard);
 
   return true;
-}
+};
 
 // reshuffle the deck when necessary (could automate this...)
 let shuffleDiscardPile = () => {
@@ -101,18 +103,19 @@ let shuffleDiscardPile = () => {
 
   discardPile.push(deck.pop());
 
-  return true
-}
+  return true;
+};
 
 // check if discard is valid, then discard
 let isCardValid = (card) => {
-  let lastCard = discardPile[discardPile.length-1];
+  let lastCard = discardPile[discardPile.length - 1];
 
   if (card.color === lastCard.color || card.val === lastCard.val) {
     return true;
   }
+
   return false;
-}
+};
 
 module.exports = {
   makeNewDeck: makeNewDeck,
@@ -120,4 +123,4 @@ module.exports = {
   takeCard: takeCard,
   shuffleDiscardPile: shuffleDiscardPile,
   isValidCard: isValidCard,
-}
+};
