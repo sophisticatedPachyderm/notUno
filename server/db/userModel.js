@@ -4,7 +4,7 @@ var db = require('./dbStart.js');
 var __SALT = 10;
 
 module.exports = {
-  verifyPassword: function(username, password, response) {
+  verifyPassword: function(username, password, callback) {
     db.query(
       `
       SELECT
@@ -22,15 +22,26 @@ module.exports = {
             if (err) {
               console.log('err on bcryptCompare', err);
             } else {
-              response.send(res);
-              response.end();
-              return;
+              callback(res)
+              // callback on the boolean returned;
             }
           });
         }
       });
       // reminder to verify that mysql returns an array of results
       // this should be a 1x1 array
+
+      /*
+      UserSchema.methods.comparepasswords = function(password, cb) {
+        bcrypt.compare(password, this.password, function(err, res) {
+          if (res) {
+            cb(res);
+          } else {
+            cb(res);
+          }
+        });
+      };
+      */
   },
 
   retrieveScore: function (username) {
