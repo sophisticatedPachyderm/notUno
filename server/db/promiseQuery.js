@@ -1,3 +1,4 @@
+const db = require('./dbStart.js');
 const Promise = require('bluebird');
 
 // use this in lieu of db.query to prevent callback hell
