@@ -16,7 +16,25 @@ module.exports = {
         console.log('Username/Password combination does not exist');
         res.redirect('/');
       } else {
-        userModel.verifyPassword(username, password, res);
+        userModel.verifyPassword(username, password, (user) => {
+          if (!user) {
+            console.log('invalid username/password');
+          } else {
+            // this needs to be tested, but this is a part of passport auth
+            // that needs to happen upon signin!
+            // req.logIn() for passport
+            req.logIn(username, (err) => {
+              // we pass USERNAME to the req.logIn method from passport
+              if (err) {
+                console.log(err);
+              } else {
+                res.redirect('/');
+              }
+            });
+
+
+          }
+        });
 
         // evan abstracted the req/res into the model (Steven thinks);
       }
