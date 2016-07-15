@@ -4,10 +4,8 @@ var morgan = require('morgan');
 var bcrypt = require('bcrypt-nodejs');
 var passport = require('passport');
 
-var userRoutes = require('./routes/user');
-var gameRoutes = require('./routes/game');
-
-var database = require('./db/dbStart');
+var userRoutes = require('./routes/userRoutes');
+var gameRoutes = require('./routes/gameRoutes');
 
 var app = express();
 //--------- SETUP MIDDLEWARE ----------------------//
