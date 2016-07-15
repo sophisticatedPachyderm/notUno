@@ -3,9 +3,10 @@ var parser = require('body-parser');
 var morgan = require('morgan');
 var bcrypt = require('bcrypt-nodejs');
 var passport = require('passport');
+
 var LocalStrategy = require('passport-local').Strategy;
-var userRoutes = require('./routes/user');
-var gameRoutes = require('./routes/game');
+var userRoutes = require('./routes/userRoutes');
+var gameRoutes = require('./routes/gameRoutes');
 
 var database = require('./db/dbStart');
 
