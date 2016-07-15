@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const gameController = require('./../db/gameController');
+const gameController = require('./../db/gameController.js');
 
 //--------------- GAME RETRIEVAL --------------------//
 

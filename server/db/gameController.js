@@ -6,7 +6,7 @@ module.exports = {
 
   getGame: (req, res) => {
     gameModel.getGame(req.body.gameId, (rows) => {
-      console.log('getGame callback', req.body.gameId);
+      console.log('getGame callback', req.body.gameId, rows);
       res.json(rows);
     });
   },

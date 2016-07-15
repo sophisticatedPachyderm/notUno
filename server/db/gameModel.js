@@ -1,13 +1,11 @@
-const mysql = require('mysql');
-const db = require('./dbStart.js');
-const promiseQuery = ('./promiseQuery.js');
+const promiseQuery = require('./promiseQuery.js');
 
 module.exports = {
 
 //--------------- GAME RETRIEVAL --------------------//
 
   getGame: (gameId, callback) => {
-
+    console.log('getGame model:', gameId);
     promiseQuery(`
       SELECT
         games.*,
@@ -203,9 +201,9 @@ module.exports = {
     // assumes client will have access to gameId, drawDeck, and userPosition (i.e. p0, p1, p2, p3)
   },
 
-  updateScore: (userId, score, res) => {
+  updateScore: (userId, score, callback) => {
     // tested, not assigned to an endpoint
-    db.query(
+    promiseQuery(
       `
       UPDATE
         users
@@ -213,14 +211,9 @@ module.exports = {
         score = (score + ${score})
       WHERE
         userId = ${userId};
-      `, (err, rows) => {
-      if (err) {
-        console.log('err on completeGame', err);
-      } else {
-        console.log(rows, 'completeGame success');
-        res.send('complete');
-        res.end();
-      }
+      `, true)
+    .then((rows) => {
+      callback(rows);
     });
   },
 
