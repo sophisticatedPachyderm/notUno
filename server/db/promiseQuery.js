@@ -1,3 +1,5 @@
+'use strict';
+
 const db = require('./dbStart.js');
 const Promise = require('bluebird');
 

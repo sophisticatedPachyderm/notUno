@@ -2,9 +2,11 @@
   "name": "not_uno",
   "version": "1.0.0",
   "description": "definitely not uno",
-  "main": "index.js",
+  "main": "server/bundle.js",
   "scripts": {
+    "webpack": "webpack --progress --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server/server.js",
     "start": "nodemon server/server.js"
   },
   "repository": {
@@ -15,6 +17,9 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/sophisticatedPachyderm/"
+  },
+  "engines": {
+    "node": "6.2.2"
   },
   "homepage": "https://github.com/sophisticatedPachyderm/",
   "dependencies": {
@@ -32,7 +37,8 @@
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "react": "^15.2.1",
-    "react-dom": "^15.2.1"
+    "react-dom": "^15.2.1",
+    "ws": "^1.1.1"
   },
   "devDependencies": {
     "babel": "^6.5.2",
