@@ -1,3 +1,5 @@
+'use strict';
+
 var mysql = require('mysql');
 var bcrypt = require('bcrypt-nodejs');
 var db = require('./dbStart.js');

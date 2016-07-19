@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 
 class Card {
@@ -37,9 +39,9 @@ let makeNewDeck = () => {
   };
 
   for (let color of colors) {
-    for (let type in deckBreakdown) {
-      for (let i = 0; i < deckBreakdown[type]; i++) {
-        deck.push(new Card(type, color));
+    for (let cardType in deckBreakdown) {
+      for (let i = 0; i < deckBreakdown[cardType]; i++) {
+        deck.push(new Card(cardType, color));
       }
     }
   }
@@ -65,9 +67,8 @@ let dealCards = (deck, players) => {
   }
 
   // add a card to the discardPile
-
-  discardPile.push(deck.pop());
-  return true;
+  let discardPile = [deck.pop()];
+  return discardPile;
 };
 
 // --------------------- turn by turn actions -------------------- //
@@ -122,5 +123,5 @@ module.exports = {
   dealCards: dealCards,
   takeCard: takeCard,
   shuffleDiscardPile: shuffleDiscardPile,
-  isValidCard: isValidCard,
+  isCardValid: isCardValid,
 };

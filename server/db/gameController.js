@@ -1,3 +1,5 @@
+'use strict';
+
 const gameModel = require('./gameModel.js');
 
 module.exports = {
@@ -13,7 +15,7 @@ module.exports = {
 
   allGames: (req, res) => {
     gameModel.allGames(req.body.userId, (rows) => {
-      console.log('allGames callback', req.body.userId);
+      console.log('allGames callback', req.body.userId, rows);
       res.json(rows);
     });
   },
@@ -31,9 +33,9 @@ module.exports = {
   },
 
   joinGame: (req, res) => {
-    var {userId, gameId} = req.body;
-
-    gameModel.joinGame(userId, gameId, (rows) => {
+    // var {userId, gameId} = req.body;
+    console.log('joinGame in controller', req.body);
+    gameModel.joinGame(req.body.userId, req.body.gameId, (rows) => {
       console.log('joinGame complete');
       //socket call to players in this game showing that username has joined!
       res.json(rows);  // boolean?
@@ -61,11 +63,10 @@ module.exports = {
   },
 
   myTurn: (req, res) => {
-    // right now we are trusting the client to handle game logic
-    // the server does not attempt to check for cheating / hacking
-    var parameters = req.body;  //{userId, gameId, playDeck, drawDeck, userHand, userPosition, currentPlayer, direction, complete}
+    //cardIndex is the index of the card to be played
+    // var {userId, gameId, cardIndex, wildColor} = req.body;
 
-    gameModel.updateGame(parameters, (rows) => {
+    gameModel.myTurn(req.body, (rows) => {
       console.log('myTurn callback');
       //socket call to update other players on the changes
 

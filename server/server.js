@@ -1,3 +1,6 @@
+'use strict';
+
+var server = require('http').createServer();
 var express = require('express');
 var parser = require('body-parser');
 var morgan = require('morgan');
@@ -16,11 +19,17 @@ app.use(morgan('dev'));
 app.use(parser.json());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.static('public'));
 app.use('/api/user', userRoutes);
 app.use('/api/game', gameRoutes);
 
 
-var port = 3000;
-app.listen(port, function() {
+//--------- SETUP WEBSOCKETS ----------------------//
+require('./sockets/socketHandler.js')(server);
+
+var port = process.env.PORT || 3000;
+
+server.on('request', app);
+server.listen(port, function() {
   console.log('Listening to port:', port);
 });
