@@ -5,6 +5,47 @@ const WebSocketServer = require('ws').Server;
 const gameModel = require('./../db/gameModel.js');
 const userController = require('../db/userController.js');
 
+//--------------- ESTABLISH WEBSOCKET CONNECTION --------------------//
+
+var wss;
+
+module.exports = {
+  init: (server) => {
+    wss = new WebSocketServer({server: server});
+
+    wss.on('connection', (ws) => {
+      var location = url.parse(ws.upgradeReq.url, true);
+      console.log(location);
+
+      ws.on('message', (data) => {
+        console.log('received data', data);
+
+        try {
+          const parsed = JSON.parse(data);
+          const route = parsed.route;
+
+          if (wsRoutes[route]) {
+            wsRoutes[route](ws, parsed);
+          } else {
+            console.log('Error -------- route does not exist', route);
+            // wss.broadcast(['Broadcast to all clients! -------- Whassup!!!', 'yup']);
+            // ws.send('Route does not exist');
+          }
+          
+        } catch (e) {
+          console.log('CANNOT PARSE DATA!');
+          return;
+        }
+
+      });
+
+      console.log('websocket client connected to server');
+    });
+  }
+};
+
+//--------------- WEBSOCKET ROUTING --------------------//
+
 const wsRoutes = {
 
   //--------------- GAME RETRIEVAL --------------------//
@@ -13,16 +54,25 @@ const wsRoutes = {
 
     gameModel.getGame(req.gameId, (rows) => {
       console.log('getGame callback', rows);
-      ws.send(JSON.stringify(rows));
+
+      //can we send the specific card to the person 
+      wsSend(ws, 'getGameResponse', rows);
     });
   },
 
   allGames: (ws, req) => {
     gameModel.allGames(req.userId, (rows) => {
       console.log('allGames callback', req.userId, rows);
-      ws.send(JSON.stringify(rows));
+      wsSend(ws, 'allGamesResponse', rows);
     });
   },
+
+  // openGames: (ws, req) => {
+  //   gameModel.allGames(req.userId, (rows) => {
+  //     console.log('allGames callback', req.userId, rows);
+  //     wsSend(ws, rows);
+  //   });
+  // },
 
 
 //--------------- GAME ACTIONS --------------------//
@@ -30,7 +80,7 @@ const wsRoutes = {
   createGame: (ws, req) => {
     gameModel.createGame(req.userId, (rows) => {
       console.log('createGame callback');
-      ws.send(JSON.stringify(rows));  // make this a boolean?
+      wsSend(ws, 'createGameResponse', rows);  // make this a boolean?
     });
   },
 
@@ -40,7 +90,7 @@ const wsRoutes = {
     gameModel.joinGame(userId, gameId, (rows) => {
       console.log('joinGame complete');
       //socket call to players in this game showing that username has joined!
-      ws.send(JSON.stringify(rows));  // boolean?
+      wsSend(ws, 'joinGameResponse', rows);  // boolean?
     });
   },
 
@@ -50,7 +100,7 @@ const wsRoutes = {
     gameModel.startGame(userId, gameId, () => {
       console.log('startGame complete');
       //socket call to players in this game showing that game has started
-      ws.send(JSON.stringify(rows));
+      wsSend(ws, 'startGameResponse', rows);
     });
   },
 
@@ -60,7 +110,7 @@ const wsRoutes = {
     gameModel.drawCard(userId, gameId, (rows) => {
       console.log('drawCard complete');
       //socket call to players in this game showing draw card
-      ws.send(JSON.stringify(rows));
+      wsSend(ws, 'drawCardResponse', rows);
     });
   },
 
@@ -80,7 +130,7 @@ const wsRoutes = {
         //need to update for all players
         // gameModel.updateScore();
       }
-      ws.send(JSON.stringify(rows));
+      wsSend(ws, 'drawCardResponse', rows);
     });
   },
 // ------ USER FUNCTIONS FROM CONTROLLER ------- //
@@ -96,31 +146,27 @@ const wsRoutes = {
 
 };
 
+//--------------- USE COUNTER TO CREATE AUTO-INCREMENT MSGID (for each reboot of server) --------------------//
 
-//--------------- ESTABLISH WEBSOCKET CONNECTION --------------------//
+var msgId = 1;
+
+const wsSend = (ws, route, rows) => {
+  rows.msgId = msgId;
+  rows.route = route;
+  ws.send(JSON.stringify(rows));
+  msgId++;
+};
 
 
-module.exports = (server) => {
 
-  const wss = new WebSocketServer({ server: server });
+const broadcast = (data, route) => {
+  data.msgId = msgId;
+  data.route = route;
+  var json = JSON.stringify(data);
 
-  wss.on('connection', (ws) => {
-    var location = url.parse(ws.upgradeReq.url, true);
-    console.log(location);
-
-    ws.on('message', (data) => {
-      console.log('received data', data);
-      const parsed = JSON.parse(data);
-      const route = parsed.route;
-
-      if (wsRoutes[route]) {
-        wsRoutes[route](ws, parsed);
-      } else {
-        console.log('Error -------- route does not exist', route);
-      }
-
-    });
-
-    console.log('websocket client connected to server');
+  msgId++;
+  console.log('stringify:', json);
+  wss.clients.forEach((client) => {
+    client.send(json);
   });
 };
