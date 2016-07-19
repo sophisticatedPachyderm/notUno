@@ -11,8 +11,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var userRoutes = require('./routes/userRoutes');
 var gameRoutes = require('./routes/gameRoutes');
 
-var database = require('./db/dbStart');
-
 var app = express();
 //--------- SETUP MIDDLEWARE ----------------------//
 app.use(morgan('dev'));
@@ -25,7 +23,8 @@ app.use('/api/game', gameRoutes);
 
 
 //--------- SETUP WEBSOCKETS ----------------------//
-require('./sockets/socketHandler.js')(server);
+var socketHandler = require('./sockets/socketHandler.js');
+socketHandler.init(server);
 
 var port = process.env.PORT || 3000;
 

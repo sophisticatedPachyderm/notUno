@@ -8,15 +8,6 @@ const { convertCardsToTuples, getNextPlayer } = require('./../gameLogic/gameTool
 //--------------- GAME HELPER FUNCTIONS --------------------------------------//
 
 
-//get the new currentPlayer based on the current direction
-// const getNextPlayer = (currentPlayer, direction, playerCount) => {
-//   direction === 1 ? currentPlayer++ : currentPlayer --;
-
-//   if (currentPlayer >= playerCount) { currentPlayer = 0; }
-//   if (currentPlayer < 0) { currentPlayer = playerCount - 1; }
-//   return currentPlayer;
-// };
-
 const insertIntoGamesByUser = (userId, gameId, position) => {
   return promiseQuery(
     `
@@ -59,7 +50,8 @@ const getGameState = (userId, gameId) => {
     var playerCount = rows[0].p2Hand === null ? 2 : rows[0].p3Hand === null ? 3 : 4;
 
     //we need to get the next Hand to handle takeTwo / takeFour cards played at myTurn
-    var nextHandName = 'p' + getNextPlayer(rows[0].currentPlayer, rows[0].direction, playerCount) + 'Hand';
+    var nextPosition = getNextPlayer(rows[0].currentPlayer, rows[0].direction, playerCount);
+    var nextHandName = 'p' + nextPosition + 'Hand';
     var nextHand = JSON.parse(rows[0][nextHandName]);
 
     return {
@@ -72,6 +64,7 @@ const getGameState = (userId, gameId) => {
       playerCount: playerCount,
       nextHandName: nextHandName,
       nextHand: nextHand,
+      nextPosition: nextPosition,
       myPosition: rows[0].position
     };
   });
@@ -217,19 +210,6 @@ module.exports = {
       // player position is set based on join order
       var gameId = Number(rows.insertId);
       return insertIntoGamesByUser(userId, gameId, position);
-      // return promiseQuery(
-      //   `
-      //   INSERT
-      //   INTO
-      //     gamesByUser
-      //     ( gameId, userId, position )
-      //   VALUES
-      //     ( '${insertId}', '${userId}', 0 );
-      //   `, true);
-      // .then((rows) => {
-      //   console.log('createGame success!');
-      //   callback(rows);
-      // });
     })
     .then((rows) => {
       console.log('createGame success!');
@@ -306,23 +286,6 @@ module.exports = {
 
         //then update the position in games table...
       return promiseQuery(queryString, true);
-        // .then((rows) => {
-        //   return insertIntoGamesByUser(userId, gameId, position);
-
-          // promiseQuery(
-          //   `
-          //   INSERT
-          //   INTO
-          //     gamesByUser
-          //     ( gameId, userId, position )
-          //   VALUES
-          //     ( '${gameId}', '${userId}', '${position}' );
-          //   `, true)
-          // .then((rows) => {
-          //   callback();
-          // });
-        // });
-      // }
     })
     .then(insertIntoGamesByUser(userId, gameId, position))
     .then(callback)
@@ -342,14 +305,15 @@ module.exports = {
   drawCard: (userId, gameId, callback) => {
     userId = Number(userId);
     gameId = Number(gameId);
+    var cardDrawn;
 
     getGameState(userId, gameId)
     .then(({unplayedCards, handName, myHand, myPosition, currentPlayer}) => {
 
       // Handle erros and cheating
       if (currentPlayer !== myPosition) { throw `Not your turn to play! ${currentPlayer} !== ${myPosition}`; }
-
-      myHand.push(unplayedCards.pop());
+      cardDrawn = unplayedCards.pop();
+      myHand.push(cardDrawn);
       return {
         handName: handName,
         myHand: myHand,
@@ -361,6 +325,7 @@ module.exports = {
     })
     .then(updateGameState)
     .then((rows) => {
+      rows.cardDrawn = cardDrawn;
       callback(rows);
     })
     .catch((err) => {
@@ -372,7 +337,8 @@ module.exports = {
     userId = Number(userId);
     gameId = Number(gameId);
     cardIndex = Number(cardIndex);
-    var gameOver = false;
+
+    var response = {};
 
     getGameState(userId, gameId)
     .then(({unplayedCards, playedCards, handName, myHand, myPosition, currentPlayer, direction, playerCount, nextHandName, nextHand}) => {
@@ -449,14 +415,32 @@ module.exports = {
         };
       }
 
-      if (myHand.length === 0) { gameOver = true; }
+      response = {
+        gameId: gameId,
+        unplayedCards: unplayedCards,
+        playedCards: playedCards,
+        currentPlayer: currentPlayer,
+        direction: direction,
+        cardPlayed: card,
+        lastPlayerId: userId,
+        gameOver: false
+      };
+
+      if (myHand.length === 0) { response.gameOver = true; }
       return object;
 
     })
     .then(updateGameState)
     .then((rows) => {
-      rows.gameOver = gameOver;
-      callback(rows);
+
+      //rows is not useful
+      // var object = {
+      //   gameOver: gameOver,
+      //   cardPlayed: cardPlayed,
+        
+      // };
+
+      callback(response);
     })
     .catch((err) => {
       console.log('Caught error', err);

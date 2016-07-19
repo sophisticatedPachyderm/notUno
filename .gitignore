@@ -1,7 +1,7 @@
 /node_modules
 
 secrets.js
-
+bundle.js
 deckCreator.js
 
 # Elastic Beanstalk Files
