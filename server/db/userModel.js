@@ -70,7 +70,7 @@ module.exports = {
     // for simplicity, no pass check to retrieve score since we'll use for leaderboards
   },
 
-  newUser: function(username, password, res) {
+  newUser: function(username, password, callback) {
     bcrypt.genSalt(__SALT, function(err, salt) {
       bcrypt.hash(password, salt, null, function(err, hash) {
         if (err) {
@@ -88,9 +88,7 @@ module.exports = {
                 console.log('error on DB insert' + err);
               } else {
                 console.log(rows + ' write success');
-                res.send('success');
-                res.sendStatus(201);
-                res.end();
+                callback(rows);
               }
             }
           );
@@ -110,7 +108,7 @@ module.exports = {
       FROM
         users
       WHERE
-        username = ${username};
+        username = '${username}';
       `, function (err, rows) {
         if (err) {
           console.log('err on user retrieval query', err);

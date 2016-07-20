@@ -3,61 +3,43 @@
 var userModel = require('./userModel.js');
 
 module.exports = {
-  signin: function (req, res) {
-    var username = req.body.username;  // bodyParser
-    var password = req.body.password;
-
-    /* we should remember this structure when when we have the
-    API calls from the client
-    verifyPassword: function (username, password)
-    */
-
+  signin: function (ws, data) {
+    var username = data.username;
+    var password = data.password;
     userModel.doesUserExist(username, (bool) => {
       if (!bool) {
         // user does not exist
         console.log('Username/Password combination does not exist');
-        res.redirect('/');
+        ws.send(JSON.stringify('Username/Password combination does not exist'));
       } else {
         userModel.verifyPassword(username, password, (user) => {
           if (!user) {
             console.log('invalid username/password');
           } else {
-            // this needs to be tested, but this is a part of passport auth
-            // that needs to happen upon signin!
-            // req.logIn() for passport
-            req.logIn(username, (err) => {
-              // we pass USERNAME to the req.logIn method from passport
-              if (err) {
-                console.log(err);
-              } else {
-                res.redirect('/');
-              }
-            });
+            // auth/passport stuff for later
 
-
+            ws.send(JSON.stringify('successfully logged in'));
           }
         });
-
-        // evan abstracted the req/res into the model (Steven thinks);
       }
     });
   },
 
-  signup: (req, res) => {
+  signup: (ws, data) => {
     // see if node enjoys arrow es6
-    var username = req.body.username;
-    var password = req.body.password;
+    var username = data.username;
+    var password = data.password;
 
     userModel.doesUserExist(username, (bool) => {
       if (bool) {
         console.log('Username in use!');
-        res.redirect('/');
+        ws.send(JSON.stringify('username in use!'));
         return;
       } else {
-        userModel.newUser(username, password);
-        res.redirect('/');
-        console.log('new user created');
-        res.end();
+        userModel.newUser(username, password, (rows) => {
+          ws.send(JSON.stringify('user created!'));
+          ws.send(JSON.stringify(rows));
+        });
       }
     });
 
