@@ -3,6 +3,7 @@
 const url = require('url');
 const WebSocketServer = require('ws').Server;
 const gameModel = require('./../db/gameModel.js');
+const userController = require('../db/userController.js');
 
 const wsRoutes = {
 
@@ -72,7 +73,7 @@ const wsRoutes = {
       //socket call to update other players on the changes
 
       //we need to grab all players Ids and scores to pass into completeGame
-      //we probably need to call 
+      //we probably need to call
 
       //if the game is over, update user scores
       if (rows.gameOver === true) {
@@ -82,6 +83,17 @@ const wsRoutes = {
       ws.send(JSON.stringify(rows));
     });
   },
+// ------ USER FUNCTIONS FROM CONTROLLER ------- //
+  signin: (ws, data) => {
+    userController.signin(ws, data);
+    console.log('sent to ws route signin');
+  },
+
+  signup: (ws, data) => {
+    userController.signup(ws, data);
+    console.log('sent to ws route signup');
+  },
+
 };
 
 
@@ -94,6 +106,7 @@ module.exports = (server) => {
 
   wss.on('connection', (ws) => {
     var location = url.parse(ws.upgradeReq.url, true);
+    console.log(location);
 
     ws.on('message', (data) => {
       console.log('received data', data);
