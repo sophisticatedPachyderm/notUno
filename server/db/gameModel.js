@@ -55,9 +55,9 @@ const getGameState = (userId, gameId) => {
     var nextHand = JSON.parse(rows[0][nextHandName]);
 
     return {
-      unplayedCards: unplayedCards, 
-      playedCards: playedCards, 
-      handName: handName, 
+      unplayedCards: unplayedCards,
+      playedCards: playedCards,
+      handName: handName,
       myHand: myHand,
       currentPlayer: rows[0].currentPlayer,
       direction: rows[0].direction,
@@ -154,7 +154,7 @@ module.exports = {
         players: players
       };
 
-      callback(object);  
+      callback(object);
     })
     .catch((err) => {
       console.log('Caught error:', err);
@@ -167,21 +167,35 @@ module.exports = {
     promiseQuery(
       `
       SELECT
-        games.*
+        gu.gameID,
+        gu.userId,
+        u.username
       FROM
-        games
-      INNER JOIN
-        gamesByUser
+        gamesByUser gu join users u
+          on (gu.userID = u.userId)
       WHERE
-        gamesByUser.userId = '${userId}'
-      AND
-        games.gameId = gamesByUser.gameId
-      AND
-        (games.gameComplete = 0 OR 1);
+        gameId in (SELECT
+          gameId
+        FROM
+          gamesByUser
+        WHERE
+          userId = ${userId});
       `, true)
     .then((rows) => {
-      console.log(rows, 'getMyGames success');
-      callback(rows);
+      console.log('retrieval success');
+      let formatted = rows.reduce((output, row) => {
+      	if (output[row.gameId]) {
+      		output[row.gameId].usernameList.push(row.username);
+      		output[row.gameId].userIdList.push(row.userId);
+      	} else {
+      		output[row.gameId] = {
+      			usernameList: [row.username],
+      			userIdList: [row.userId]
+      		};
+      	}
+      	return output;
+      }, {});
+      callback(formatted);
     });
     // retrieve all of a users ongoing games
   },
@@ -192,7 +206,7 @@ module.exports = {
 
   createGame: (userId, callback) => {
     userId = Number(userId);
-    
+
     //First insert in to games table...
     // When the game hasn't started, we store the userId at the p#Hand field
     // as a convenience method to keep track of how many players have joined
@@ -247,7 +261,7 @@ module.exports = {
       // -------------- Errors -----------------------//
       if (position === 'gameFull') { throw 'Error -> gameFull'; }
 
-        
+
       var queryString = `
         UPDATE
           games
@@ -299,7 +313,7 @@ module.exports = {
     gameId = Number(gameId);
 
     var {unplayedCards, playedCards, currentPlayer, p0Hand, p1Hand, p2Hand, p3Hand} = gameInit(4);
-    
+
   },
 
   drawCard: (userId, gameId, callback) => {
@@ -346,7 +360,7 @@ module.exports = {
       // Handle errors and cheating
       if (currentPlayer !== myPosition) { throw `Not your turn to play! ${currentPlayer} !== ${myPosition}`; }
       if (!myHand[cardIndex]) { throw `Card does not exist at index: ${cardIndex}`; }
-      if (myHand[cardIndex][0] !== playedCards[playedCards.length - 1][0] 
+      if (myHand[cardIndex][0] !== playedCards[playedCards.length - 1][0]
         && myHand[cardIndex][1] !== playedCards[playedCards.length - 1][1]
         && myHand[cardIndex][1] !== 1) { throw 'Illegal card play, colors or numbers must match, or wild card: ' + cardIndex; }
 
@@ -389,11 +403,11 @@ module.exports = {
       console.log('Player wants to play', card);
 
       //play special cards
-      if (isNaN(card[0]) ) {  
-        specials[card[0]](); 
-      } 
+      if (isNaN(card[0]) ) {
+        specials[card[0]]();
+      }
 
-      //then set currentPlayer 
+      //then set currentPlayer
       currentPlayer = getNextPlayer(currentPlayer, direction, playerCount);
 
       var object = {
@@ -437,7 +451,7 @@ module.exports = {
       // var object = {
       //   gameOver: gameOver,
       //   cardPlayed: cardPlayed,
-        
+
       // };
 
       callback(response);
