@@ -15,7 +15,7 @@ module.exports = {
         userModel.verifyPassword(username, password, (user) => {
           if (!user) {
             let response = {
-              route: 'signin',
+              route: 'signInResponse',
               response: 'negative',
             };
             ws.send(JSON.stringify(response));

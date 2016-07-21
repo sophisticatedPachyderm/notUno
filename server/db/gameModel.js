@@ -192,7 +192,7 @@ module.exports = {
 
   createGame: (userId, callback) => {
     userId = Number(userId);
-    
+    var gameId;
     //First insert in to games table...
     // When the game hasn't started, we store the userId at the p#Hand field
     // as a convenience method to keep track of how many players have joined
@@ -208,11 +208,12 @@ module.exports = {
 
       // ...then use insertId to insert into gamesByUser table
       // player position is set based on join order
-      var gameId = Number(rows.insertId);
-      return insertIntoGamesByUser(userId, gameId, position);
+      gameId = Number(rows.insertId);
+      return insertIntoGamesByUser(userId, gameId, 0);
     })
     .then((rows) => {
       console.log('createGame success!');
+      rows.gameId = gameId;
       callback(rows);
     })
     .catch((err) => {
