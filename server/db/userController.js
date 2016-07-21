@@ -14,11 +14,22 @@ module.exports = {
       } else {
         userModel.verifyPassword(username, password, (user) => {
           if (!user) {
-            console.log('invalid username/password');
+            let response = {
+              route: 'signInResponse',
+              response: 'negative',
+            };
+            ws.send(JSON.stringify(response));
           } else {
             // auth/passport stuff for later
+            let response = {
+              route: 'signInResponse',
+              response: 'affirmative',
+              username: username,
+            };
 
-            ws.send(JSON.stringify('successfully logged in'));
+            // @evan, I'm responding with the same route and the response if
+            // username/password was valid
+            ws.send(JSON.stringify(response));
           }
         });
       }
