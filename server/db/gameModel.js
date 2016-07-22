@@ -198,12 +198,12 @@ module.exports = {
       return promiseQuery(
       `
       SELECT
-        gu.gameID,
+        gu.gameId,
         gu.userId,
         u.username
       FROM
         gamesByUser gu join users u
-          on (gu.userID = u.userId)
+          on (gu.userId = u.userId)
       WHERE
         gameId in (SELECT
           gameId
@@ -211,21 +211,21 @@ module.exports = {
           gamesByUser
         WHERE
           userId = ${userId});
-      `, true)
+      `, true);
     })
     .then((rows) => {
       console.log('retrieval success');
       let formatted = rows.reduce((output, row) => {
-      	if (output[row.gameId]) {
-      		output[row.gameId].usernameList.push(row.username);
-      		output[row.gameId].userIdList.push(row.userId);
-      	} else {
-      		output[row.gameId] = {
-      			usernameList: [row.username],
-      			userIdList: [row.userId]
-      		};
-      	}
-      	return output;
+        if (output[row.gameId]) {
+          output[row.gameId].usernameList.push(row.username);
+          output[row.gameId].userIdList.push(row.userId);
+        } else {
+          output[row.gameId] = {
+            usernameList: [row.username],
+            userIdList: [row.userId]
+          };
+        }
+        return output;
       }, {});
       callback(formatted);
     })
