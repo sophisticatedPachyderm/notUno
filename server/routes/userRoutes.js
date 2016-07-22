@@ -15,15 +15,14 @@ router.post('/chat', function(req, res) {
   res.end();
 });
 
-router.get('/auth', function(req, res) {
-  console.log('GET request for /api/user/auth');
-  db.verifyPassword('docBrown', 'crazy', res);
+router.post('/auth/signin', function(req, res) {
+  console.log('POST request for /api/user/auth/signin');
+  db.signin(req, res);
 });
 
-router.post('/auth', function(req, res) {
-  console.log('POST request for /api/user/auth');
-  // this will create a new user in the database
-  db.newUser(req.body.username, req.body.password, res);
+router.post('/auth/signup', function(req, res) {
+  console.log('POST request for /api/user/auth/signup');
+  db.signup(req, res);
 });
 
 module.exports = router;

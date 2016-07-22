@@ -88,7 +88,18 @@ module.exports = {
                 console.log('error on DB insert' + err);
               } else {
                 console.log(rows + ' write success');
-                callback(rows);
+                db.query(
+                  `
+                  SELECT
+                    *
+                  FROM
+                    users
+                  WHERE
+                    username = '${username}';
+                  `, (err, rows) => {
+                    callback(rows);
+                  }
+                );
               }
             }
           );
@@ -114,7 +125,7 @@ module.exports = {
           console.log('err on user retrieval query', err);
         } else {
           console.log(rows, ' user retrieval success');
-          callback(rows[0]); // should be a boolean
+          callback(rows[0]); // should be a empty/valid arr
         }
       });
 
