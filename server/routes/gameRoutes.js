@@ -48,7 +48,7 @@ router.post('/drawcard', (req, res) => {
 //for playing a card to end a turn
 router.post('/myturn', (req, res) => {
   console.log('POST request for /api/game/myturn');
-  res.end();
+  gameController.myTurn(req, res);
 });
 
 module.exports = router;

@@ -27,8 +27,7 @@ module.exports = {
   createGame: (req, res) => {
     gameModel.createGame(req.body.userId, (rows) => {
       console.log('createGame callback');
-      //should we do a socket call to other players to make this new game auto-show?
-      res.json(rows);  // make this a boolean?
+      res.json(rows);  
     });
   },
 
@@ -37,28 +36,25 @@ module.exports = {
     console.log('joinGame in controller', req.body);
     gameModel.joinGame(req.body.userId, req.body.gameId, (rows) => {
       console.log('joinGame complete');
-      //socket call to players in this game showing that username has joined!
-      res.json(rows);  // boolean?
+      res.json(rows);  
     });
   },
 
   startGame: (req, res) => {
     var {userId, gameId} = req.body;
 
-    gameModel.startGame(userId, gameId, () => {
+    gameModel.startGame(userId, gameId, (rows) => {
       console.log('startGame complete');
-      //socket call to players in this game showing that game has started
-      res.redirect('/');
+      res.json(rows);
     });
   },
 
   drawCard: (req, res) => {
-    var {userId, gameId} = req.body;
+    // var {userId, gameId} = req.body;
 
-    gameModel.drawCard(userId, gameId, () => {
+    gameModel.drawCard(req.body.userId, req.body.gameId, (rows) => {
       console.log('drawCard complete');
-      //socket call to players in this game showing draw card
-      res.redirect('/');
+      res.json(rows);
     });
   },
 
@@ -78,7 +74,7 @@ module.exports = {
         //need to update for all players
         // gameModel.updateScore();
       }
-      res.redirect('/');
+      res.json(rows);
     });
   },
 };

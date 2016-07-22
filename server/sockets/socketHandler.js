@@ -80,15 +80,7 @@ const wsRoutes = {
 
   //--------------- GAME RETRIEVAL --------------------//
 
-  getGame: (ws, req) => {
-
-    gameModel.getGame(req.gameId, (rows) => {
-      console.log('getGame callback', rows);
-
-      //can we send the specific card to the person 
-      wsSend(ws, 'getGameResponse', rows);
-    });
-  },
+  
 
   allGames: (ws, req) => {
     gameModel.allGames(req.userId, (rows) => {
