@@ -54,15 +54,15 @@ module.exports = {
 
 var msgId = 1;
 
-const wsSend = (ws, route, rows) => {
-  rows.msgId = msgId;
-  rows.route = route;
-  ws.send(JSON.stringify(rows));
+const wsSend = (ws, route, data) => {
+  data.msgId = msgId;
+  data.route = route;
+  ws.send(JSON.stringify(data));
   msgId++;
 };
 
 
-const broadcast = (data, route) => {
+const wsBroadcast = (route, data) => {
   data.msgId = msgId;
   data.route = route;
   var json = JSON.stringify(data);
@@ -130,27 +130,24 @@ const wsRoutes = {
     gameModel.drawCard(userId, gameId, (rows) => {
       console.log('drawCard complete');
       //socket call to players in this game showing draw card
-      wsSend(ws, 'drawCardResponse', rows);
+      wsBroadcast('drawCardResponse', rows);
     });
   },
 
   myTurn: (ws, req) => {
-    //cardIndex is the index of the card to be played
-    // var {userId, gameId, cardIndex, wildColor} = req;
-
     gameModel.myTurn(req, (rows) => {
       console.log('myTurn callback', rows, rows.gameOver);
       //socket call to update other players on the changes
 
-      //we need to grab all players Ids and scores to pass into completeGame
-      //we probably need to call
-
       //if the game is over, update user scores
       if (rows.gameOver === true) {
-        //need to update for all players
-        // gameModel.updateScore();
+
+        //player won the game, give him 100 points on user db
+        updateScore: (req.userId, 100, () => {
+          console.log('Player won, score on db updated');
+        });
       }
-      wsSend(ws, 'drawCardResponse', rows);
+      wsBroadcast('drawCardResponse', rows);
     });
   },
 // ------ USER FUNCTIONS FROM CONTROLLER ------- //

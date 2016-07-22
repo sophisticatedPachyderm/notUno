@@ -470,6 +470,7 @@ module.exports = {
       //then set currentPlayer
       currentPlayer = getNextPlayer(currentPlayer, direction, playerCount);
 
+      //object is sent to updateGameState
       var object = {
         handName: handName,
         myHand: myHand,
@@ -489,6 +490,7 @@ module.exports = {
         };
       }
 
+      //response is sent back to client
       response = {
         gameId: gameId,
         unplayedCards: unplayedCards,
@@ -500,13 +502,16 @@ module.exports = {
         gameOver: false
       };
 
-      if (myHand.length === 0) { response.gameOver = true; }
+      if (myHand.length === 0) { 
+        object.options.gameComplete = 2;
+        response.gameOver = true; 
+      }
       return object;
 
     })
     .then(updateGameState)
-    .then((rows) => {
-      rows.response = 'affirmative',
+    .then(() => {
+      response.response = 'affirmative',
       callback(response);
     })
     .catch((err) => {
