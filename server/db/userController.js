@@ -3,35 +3,37 @@
 var userModel = require('./userModel.js');
 
 module.exports = {
-  signin: function (ws, data) {
-    var username = data.username;
-    var password = data.password;
+  signin: (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    let userId = null;
     userModel.doesUserExist(username, (bool) => {
       if (!bool) {
-        // user does not exist
         console.log('Username/Password combination does not exist');
-        ws.send(JSON.stringify('Username/Password combination does not exist'));
+        res.json('Username/Password combination does not exist');
       } else {
-        userModel.verifyPassword(username, password, (user) => {
-          if (!user) {
-            let response = {
-              route: 'signInResponse',
-              response: 'negative',
-            };
-            ws.send(JSON.stringify(response));
-          } else {
-            // auth/passport stuff for later
-            let response = {
-              route: 'signInResponse',
-              response: 'affirmative',
-              username: username,
-            };
-
-            // @evan, I'm responding with the same route and the response if
-            // username/password was valid
-            ws.send(JSON.stringify(response));
-          }
-        });
+        console.log('user exists');
+        res.json(bool);
+        // userModel.verifyPassword(username, password, (user) => {
+        //   if (!user) {
+        //     let response = {
+        //       route: 'signInResponse',
+        //       response: 'negative',
+        //     };
+        //     ws.send(JSON.stringify(response));
+        //   } else {
+        //     // auth/passport stuff for later
+        //     let response = {
+        //       route: 'signInResponse',
+        //       response: 'affirmative',
+        //       username: username,
+        //     };
+        //
+        //     // @evan, I'm responding with the same route and the response if
+        //     // username/password was valid
+        //     ws.send(JSON.stringify(response));
+        //   }
+        // });
       }
     });
   },
