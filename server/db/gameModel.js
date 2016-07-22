@@ -20,6 +20,23 @@ const insertIntoGamesByUser = (userId, gameId, position) => {
     `, true);
 };
 
+const verifyUser = (userId) => {
+  return promiseQuery(
+    `
+    SELECT
+      username
+    FROM
+      users
+    WHERE
+      userId = '${userId}'
+      ;
+    `, true)
+  .then((rows) => {
+    if (!rows[0]) {
+      throw 'UserId does not exist';
+    }
+  });
+};
 
 // get the current state of the game from the dataase and parse / format it
 const getGameState = (userId, gameId) => {
@@ -102,6 +119,14 @@ const updateGameState = ({handName, myHand, gameId, options, next}) => {
   return promiseQuery(queryString, true);
 };
 
+//consistently format errors
+const createError = (err) => {
+  return {
+    response: 'negative',
+    error: err
+  };
+};
+
 
 
 
@@ -111,8 +136,9 @@ module.exports = {
 //--------------- GAME RETRIEVAL --------------------------------------//
 
   getGame: (gameId, callback) => {
-    console.log('getGame model:', gameId);
-    promiseQuery(`
+    initPromise({gameId: gameId})
+    .then(() => { 
+      return promiseQuery(`
       SELECT
         games.*,
         users.username,
@@ -130,7 +156,8 @@ module.exports = {
         games.gameId = gamesByUser.gameId
       AND
         users.userId = gamesByUser.userId;
-      `)
+      `);
+    })
     .then((rows) => {
 
       // this cleans up / reformats the json sent back to client to make easier to work with
@@ -151,7 +178,8 @@ module.exports = {
         currentPlayer: rows[0].currentPlayer,
         direction: rows[0].direction,
         gameComplete: rows[0].gameComplete,
-        players: players
+        players: players,
+        response: 'affirmative',
       };
 
       callback(object);
@@ -164,7 +192,10 @@ module.exports = {
   },
 
   allGames: (userId, callback) => {
-    promiseQuery(
+
+    initPromise({userId: userId})
+    .then(() => { 
+      return promiseQuery(
       `
       SELECT
         gu.gameID,
@@ -181,6 +212,7 @@ module.exports = {
         WHERE
           userId = ${userId});
       `, true)
+    })
     .then((rows) => {
       console.log('retrieval success');
       let formatted = rows.reduce((output, row) => {
@@ -207,17 +239,24 @@ module.exports = {
   createGame: (userId, callback) => {
     userId = Number(userId);
     var gameId;
+
     //First insert in to games table...
     // When the game hasn't started, we store the userId at the p#Hand field
     // as a convenience method to keep track of how many players have joined
-    promiseQuery(`
+    initPromise({userId: userId})
+    // .then(() => {
+    //   return verifyUser(userId);
+    // })
+    .then(() => { 
+      return promiseQuery(`
       INSERT
       INTO
         games
         ( gameComplete, p0Hand )
       VALUES
         ( 0, '${userId}');
-      `, true)
+      `, true);
+    })
     .then((rows) => {
 
       // ...then use insertId to insert into gamesByUser table
@@ -227,6 +266,7 @@ module.exports = {
     })
     .then((rows) => {
       console.log('createGame success!');
+      rows.response = 'affirmative',
       rows.gameId = gameId;
       callback(rows);
     })
@@ -300,7 +340,12 @@ module.exports = {
       }
 
         //then update the position in games table...
-      return promiseQuery(queryString, true);
+      return promiseQuery(queryString, true, {position: position});
+    })
+    .then((rows) => { return insertIntoGamesByUser(userId, gameId, rows.options.position); })
+    .then((rows) => { 
+      rows.response = 'affirmative',
+      callback(rows); 
     })
     .then(insertIntoGamesByUser(userId, gameId, position))
     .then(callback)
@@ -322,7 +367,10 @@ module.exports = {
     gameId = Number(gameId);
     var cardDrawn;
 
-    getGameState(userId, gameId)
+    initPromise({userId: userId, gameId: gameId})
+    .then(() => { 
+      return getGameState(userId, gameId);
+    })
     .then(({unplayedCards, handName, myHand, myPosition, currentPlayer}) => {
 
       // Handle erros and cheating
@@ -341,6 +389,7 @@ module.exports = {
     .then(updateGameState)
     .then((rows) => {
       rows.cardDrawn = cardDrawn;
+      rows.response = 'affirmative',
       callback(rows);
     })
     .catch((err) => {
@@ -355,7 +404,10 @@ module.exports = {
 
     var response = {};
 
-    getGameState(userId, gameId)
+    initPromise({userId: userId, gameId: gameId})
+    .then(() => { 
+      return getGameState(userId, gameId);
+    })
     .then(({unplayedCards, playedCards, handName, myHand, myPosition, currentPlayer, direction, playerCount, nextHandName, nextHand}) => {
 
       // Handle errors and cheating
@@ -447,14 +499,7 @@ module.exports = {
     })
     .then(updateGameState)
     .then((rows) => {
-
-      //rows is not useful
-      // var object = {
-      //   gameOver: gameOver,
-      //   cardPlayed: cardPlayed,
-
-      // };
-
+      rows.response = 'affirmative',
       callback(response);
     })
     .catch((err) => {
@@ -474,7 +519,11 @@ module.exports = {
         userId = ${userId};
       `, true)
     .then((rows) => {
+      rows.response = 'affirmative',
       callback(rows);
+    })
+    .catch((err) => {
+      callback(createError(err));
     });
   },
 

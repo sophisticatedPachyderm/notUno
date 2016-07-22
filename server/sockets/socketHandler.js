@@ -62,17 +62,15 @@ const wsRoutes = {
 
   allGames: (ws, req) => {
     gameModel.allGames(req.userId, (rows) => {
-      console.log('allGames callback', req.userId, rows);
-      wsSend(ws, 'allGamesResponse', rows);
+      console.log('allGames callback', req.userId);
+      //we need to wrap arrays in an object so we can assign a route: allGamesResponse
+      var object = {
+        results: rows,
+        response: 'affirmative',
+      };
+      wsSend(ws, 'allGamesResponse', object);
     });
   },
-
-  // openGames: (ws, req) => {
-  //   gameModel.allGames(req.userId, (rows) => {
-  //     console.log('allGames callback', req.userId, rows);
-  //     wsSend(ws, rows);
-  //   });
-  // },
 
 
 //--------------- GAME ACTIONS --------------------//
@@ -158,7 +156,6 @@ const wsSend = (ws, route, rows) => {
 };
 
 
-
 const broadcast = (data, route) => {
   data.msgId = msgId;
   data.route = route;
@@ -169,4 +166,5 @@ const broadcast = (data, route) => {
   wss.clients.forEach((client) => {
     client.send(json);
   });
+
 };
