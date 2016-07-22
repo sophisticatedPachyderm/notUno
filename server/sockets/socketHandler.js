@@ -62,12 +62,8 @@ const wsRoutes = {
 
   allGames: (ws, req) => {
     gameModel.allGames(req.userId, (rows) => {
-      console.log('allGames callback', req.userId);
-      //we need to wrap arrays in an object so we can assign a route: allGamesResponse
-      var object = {
-        results: rows
-      };
-      wsSend(ws, 'allGamesResponse', object);
+      console.log('allGames callback', req.userId, rows);
+      wsSend(ws, 'allGamesResponse', rows);
     });
   },
 
@@ -160,6 +156,7 @@ const wsSend = (ws, route, rows) => {
   ws.send(JSON.stringify(rows));
   msgId++;
 };
+
 
 
 const broadcast = (data, route) => {
