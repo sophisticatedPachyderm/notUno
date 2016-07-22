@@ -21,9 +21,8 @@ router.post('/auth/signin', function(req, res) {
 });
 
 router.post('/auth/signup', function(req, res) {
-  console.log('POST request for /api/user/auth');
-  // this will create a new user in the database
-  db.newUser(req.body.username, req.body.password, res);
+  console.log('POST request for /api/user/auth/signup');
+  db.signup(req, res);
 });
 
 module.exports = router;
