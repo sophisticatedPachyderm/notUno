@@ -56,6 +56,168 @@ from server to client
       "position":3,
       "positionName":"p3Hand",
       "hand":"[[4,\"g\"],[2,\"y\"],[2,\"b\"],[5,\"y\"],[9,\"b\"],[7,\"g\"],[2,\"r\"],[\"skip\",\"g\"],[4,\"b\"]]"}],
+  "response":"affirmative",
   "msgId":4,
   "route":"getGameResponse"
 }
+
+example of a game that hasn't started
+{
+  "gameId":28,
+  "unplayedCards":null,
+  "playedCards":null,
+  "currentPlayer":null,
+  "direction":null,
+  "gameComplete":0,
+  "players":[
+    {
+      "username":"docBrown",
+      "userId":5,
+      "position":0,
+      "positionName":"p0Hand",
+      "hand":"5"
+    }
+  ],
+  "response":"affirmative",
+  "msgId":2,
+  "route":"getGameResponse"
+}
+
+...does not handle errors yet (i.e. invalid gameId)
+
+
+----------- ALLGAMES ------------
+
+from client to server
+
+{
+  "route":"allGames",
+  "userId":5
+}
+
+
+from server to client
+{
+  "results":[
+    {
+      "gameId":21,
+      "unplayedCards":"[[8,\"b\"],[\"reverse\",\"b\"],[2,\"g\"],[3,\"y\"],[8,\"r\"],[\"skip\",\"b\"],[9,\"r\"],[5,\"g\"],[3,\"b\"],[4,\"y\"],[2,\"b\"],[9,\"g\"],[3,\"r\"],[5,\"y\"],[\"wild\",1],[4,\"r\"],[5,\"r\"],[\"takeFour\",1],[6,\"r\"],[1,\"y\"],[8,\"r\"],[1,\"r\"],[9,\"y\"],[\"reverse\",\"g\"],[8,\"g\"],[\"skip\",\"y\"],[4,\"b\"],[\"reverse\",\"r\"],[2,\"g\"],[6,\"g\"],[6,\"r\"],[\"skip\",\"g\"],[\"reverse\",\"y\"],[1,\"r\"],[7,\"r\"],[4,\"g\"],[9,\"y\"],[0,\"y\"],[\"takeFour\",1],[2,\"y\"],[7,\"y\"],[\"reverse\",\"r\"],[\"takeTwo\",\"y\"],[1,\"b\"],[5,\"b\"],[3,\"y\"],[1,\"y\"],[1,\"g\"],[7,\"y\"],[\"takeTwo\",\"b\"],[\"takeFour\",1],[9,\"b\"],[7,\"r\"],[0,\"b\"],[\"takeTwo\",\"y\"],[8,\"b\"],[\"skip\",\"b\"],[9,\"g\"],[\"wild\",1],[5,\"r\"],[\"takeTwo\",\"g\"],[6,\"y\"],[5,\"g\"]]",
+      "playedCards":"[[\"reverse\",\"y\"],[8,\"y\"],[8,\"y\"],[\"wild\",\"g\"],[\"reverse\",\"g\"],[\"takeTwo\",\"g\"],[\"takeFour\",\"r\"],[\"skip\",\"r\"],[3,\"r\"]]",
+      "p0Hand":"[[\"takeTwo\",\"r\"],[6,\"y\"],[0,\"r\"],[9,\"r\"],[\"skip\",\"y\"],[\"wild\",1]]",
+      "p1Hand":"[[\"takeTwo\",\"b\"],[1,\"g\"],[2,\"r\"],[6,\"b\"],[5,\"b\"],[\"reverse\",\"b\"],[\"skip\",\"r\"]]",
+      "p2Hand":"[[6,\"b\"],[7,\"g\"],[3,\"g\"],[3,\"b\"],[1,\"b\"],[\"takeTwo\",\"r\"],[3,\"g\"],[4,\"r\"],[7,\"b\"],[8,\"g\"],[4,\"y\"],[6,\"g\"]]",
+      "p3Hand":"[[4,\"g\"],[2,\"y\"],[2,\"b\"],[5,\"y\"],[9,\"b\"],[7,\"g\"],[2,\"r\"],[\"skip\",\"g\"],[4,\"b\"]]",
+      "currentPlayer":3,
+      "direction":0,
+      "gameComplete":1
+    },
+    {
+      "gameId":28,
+      "unplayedCards":null,
+      "playedCards":null,
+      "p0Hand":"5",
+      "p1Hand":null,
+      "p2Hand":null,
+      "p3Hand":null,
+      "currentPlayer":null,
+      "direction":null,
+      "gameComplete":0
+    }
+  ],
+  "response":"affirmative",
+  "msgId":1,
+  "route":"allGamesResponse"
+}
+
+
+
+
+
+----------- CREATEGAME ------------
+
+from client to server
+
+{
+  "route":"createGame",
+  "userId":5
+}
+
+
+from server to client
+
+{
+  "fieldCount":0,
+  "affectedRows":1,
+  "insertId":42,
+  "serverStatus":2,
+  "warningCount":0,
+  "message":"",
+  "protocol41":true,
+  "changedRows":0,
+  "response":"affirmative",
+  "gameId":28,
+  "msgId":1,
+  "route":"createGameResponse"
+}
+
+errors
+{
+  "response":"negative",
+  "error":"userId undefined",
+  "msgId":1,
+  "route":"createGameResponse"
+}
+
+
+----------- JOINGAME ----------------------------------------------------------------------------
+
+from client to server
+
+{
+  "route":"joinGame",
+  "userId":6,
+  "gameId":28
+}
+
+
+from server to client
+
+{
+  "fieldCount":0,
+  "affectedRows":1,
+  "insertId":48,
+  "serverStatus":2,
+  "warningCount":0,
+  "message":"",
+  "protocol41":true,
+  "changedRows":0,
+  "response":"affirmative",
+  "msgId":2,
+  "route":"joinGameResponse"
+}
+
+
+error responses
+
+{
+  "response":"negative",
+  "error":"gameFull",
+  "msgId":1,
+  "route":"joinGameResponse"
+}
+
+{
+  "response":"negative",
+  "error":"alreadyJoined",
+  "msgId":1,
+  "route":"joinGameResponse"
+}
+
+{
+  "response":"negative",
+  "error":"gameStarted",
+  "msgId":1,"route":
+  "joinGameResponse"
+}
+
+
