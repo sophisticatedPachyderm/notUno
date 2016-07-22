@@ -20,28 +20,58 @@ module.exports = {
       ws.on('message', (data) => {
         console.log('received data', data);
 
+        var parsed;
         try {
-          const parsed = JSON.parse(data);
+          parsed = JSON.parse(data);
+        } catch (e) {
+          console.log('CANNOT PARSE DATA!');
+          wsSend(ws, 'error', { error: 'Route does not exist'});
+          return;
+        }
+
+        //check first if parsing worked... seems like there should be a better way to do this.
+        if (parsed) {
           const route = parsed.route;
 
           if (wsRoutes[route]) {
             wsRoutes[route](ws, parsed);
           } else {
             console.log('Error -------- route does not exist', route);
-            // wss.broadcast(['Broadcast to all clients! -------- Whassup!!!', 'yup']);
-            // ws.send('Route does not exist');
+            wsSend(ws, 'error', { error: 'Route does not exist', requestedRoute: route });
           }
-          
-        } catch (e) {
-          console.log('CANNOT PARSE DATA!');
-          return;
         }
+          
 
       });
 
       console.log('websocket client connected to server');
     });
   }
+};
+
+//--------------- WEBSOCKET HELPERS --------------------//
+//msgId auto-increments for any outgoing message(s) (unique for each reboot of the server)
+
+var msgId = 1;
+
+const wsSend = (ws, route, rows) => {
+  rows.msgId = msgId;
+  rows.route = route;
+  ws.send(JSON.stringify(rows));
+  msgId++;
+};
+
+
+const broadcast = (data, route) => {
+  data.msgId = msgId;
+  data.route = route;
+  var json = JSON.stringify(data);
+
+  msgId++;
+  console.log('stringify:', json);
+  wss.clients.forEach((client) => {
+    client.send(json);
+  });
 };
 
 //--------------- WEBSOCKET ROUTING --------------------//
@@ -86,7 +116,7 @@ const wsRoutes = {
     var {userId, gameId} = req;
     console.log('joinGame in controller', req);
     gameModel.joinGame(userId, gameId, (rows) => {
-      console.log('joinGame complete');
+      console.log('joinGame complete', rows);
       //socket call to players in this game showing that username has joined!
       wsSend(ws, 'joinGameResponse', rows);  // boolean?
     });
@@ -141,30 +171,5 @@ const wsRoutes = {
     userController.signup(ws, data);
     console.log('sent to ws route signup');
   },
-
-};
-
-//--------------- USE COUNTER TO CREATE AUTO-INCREMENT MSGID (for each reboot of server) --------------------//
-
-var msgId = 1;
-
-const wsSend = (ws, route, rows) => {
-  rows.msgId = msgId;
-  rows.route = route;
-  ws.send(JSON.stringify(rows));
-  msgId++;
-};
-
-
-const broadcast = (data, route) => {
-  data.msgId = msgId;
-  data.route = route;
-  var json = JSON.stringify(data);
-
-  msgId++;
-  console.log('stringify:', json);
-  wss.clients.forEach((client) => {
-    client.send(json);
-  });
 
 };

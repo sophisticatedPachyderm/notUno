@@ -1,9 +1,29 @@
 OUTLINE DEFINING THE EXPECTED SOCKET MESSAGES TO BE SENT FROM CLIENT AND RETURNED FROM SERVER
 
-
 !! BOTH CLIENT & SERVER SHOULD JSON.STRINGIFY ON THE WAY OUT, & JSON.PARSE THE INCOMING DATA !!
 
------------ SIGNIN ------------
+
+----------- GENERAL ERROR HANDLING -----------------------------------------------------------------------------
+Missing required arguments in request
+
+from client to server
+
+{
+  "route":"joinGame",
+}
+
+from server to client
+
+{
+  "error":"userId undefined",
+  "msgId":1,
+  "route":"joinGameResponse"
+}
+
+
+
+
+----------- SIGNIN -----------------------------------------------------------------------------
 from client to server
 
 
@@ -13,7 +33,7 @@ from server to client
 TBD
 
 
------------ GETGAME ------------
+----------- GETGAME ----------------------------------------------------------------------------
 from client to server
 
 {
@@ -83,10 +103,18 @@ example of a game that hasn't started
   "route":"getGameResponse"
 }
 
+<<<<<<< HEAD
 ...does not handle errors yet (i.e. invalid gameId)
 
 
 ----------- ALLGAMES ------------
+=======
+
+...does not handle errors yet (i.e. invalid gameId, not assigning gameId)
+
+
+----------- ALLGAMES ----------------------------------------------------------------------------
+>>>>>>> fix2
 
 from client to server
 
@@ -130,10 +158,27 @@ from server to client
 }
 
 
+<<<<<<< HEAD
 
 
 
 ----------- CREATEGAME ------------
+=======
+if you send a userId that doesn't exist...
+
+{
+  "route":"allGames",
+  "userId":30
+}
+
+...response is an empty array
+
+[]
+
+
+
+----------- CREATEGAME ----------------------------------------------------------------------------
+>>>>>>> fix2
 
 from client to server
 
@@ -143,7 +188,11 @@ from client to server
 }
 
 
+<<<<<<< HEAD
 from server to client
+=======
+from server to client  (insertId is the id in gamesByUser Table, gameId is the gameId in games Table)
+>>>>>>> fix2
 
 {
   "fieldCount":0,
@@ -160,6 +209,7 @@ from server to client
   "route":"createGameResponse"
 }
 
+<<<<<<< HEAD
 errors
 {
   "response":"negative",
@@ -167,6 +217,9 @@ errors
   "msgId":1,
   "route":"createGameResponse"
 }
+=======
+...does not handle errors yet (i.e. invalid userid)
+>>>>>>> fix2
 
 
 ----------- JOINGAME ----------------------------------------------------------------------------
