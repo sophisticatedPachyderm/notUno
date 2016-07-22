@@ -1,6 +1,6 @@
 'use strict';
 
-const promiseQuery = require('./promiseQuery.js');
+const { promiseQuery, initPromise } = require('./promiseQuery.js');
 const gameInit = require('./../gameLogic/gameInit.js');
 const { convertCardsToTuples, getNextPlayer } = require('./../gameLogic/gameTools.js');
 
@@ -185,7 +185,7 @@ module.exports = {
       callback(object);
     })
     .catch((err) => {
-      console.log('Caught error:', err);
+      callback(createError(err));
     });
 
     // game retrieval
@@ -228,6 +228,9 @@ module.exports = {
       	return output;
       }, {});
       callback(formatted);
+    })
+    .catch((err) => {
+      callback(createError(err));
     });
     // retrieve all of a users ongoing games
   },
@@ -239,7 +242,6 @@ module.exports = {
   createGame: (userId, callback) => {
     userId = Number(userId);
     var gameId;
-
     //First insert in to games table...
     // When the game hasn't started, we store the userId at the p#Hand field
     // as a convenience method to keep track of how many players have joined
@@ -271,18 +273,19 @@ module.exports = {
       callback(rows);
     })
     .catch((err) => {
-      console.log('Caught error', err);
+      callback(createError(err));
     });
   },
 
   joinGame: (userId, gameId, callback) => {
     userId = Number(userId);
     gameId = Number(gameId);
-
     //it could be useful to first check if userId exists, before creating any rows
 
     //select the requested row from games
-    promiseQuery(
+    initPromise({userId: userId, gameId: gameId})
+    .then(() => { 
+      return promiseQuery(
       `
       SELECT
         *
@@ -291,8 +294,10 @@ module.exports = {
       WHERE
         gameId = '${gameId}'
       LIMIT 1;
-      `, true)
+      `, true);
+    })
     .then((rows) => {
+
 
       //check the positions from 1 to 3 to see if any are null
       var position = !rows[0].p1Hand ? 1 : !rows[0].p2Hand ? 2 : !rows[0].p3Hand ? 3 : 'gameFull';
@@ -300,7 +305,11 @@ module.exports = {
       console.log('myPosition:', position, positionName);
 
       // -------------- Errors -----------------------//
-      if (position === 'gameFull') { throw 'Error -> gameFull'; }
+      if (rows[0].gameComplete !== 0) { throw 'gameStarted'; }
+
+      if (userId === Number(rows[0].p0Hand) || userId === Number(rows[0].p1Hand) || userId === Number(rows[0].p2Hand) || userId === Number(rows[0].p3Hand)) { throw 'alreadyJoined'; }
+
+      if (position === 'gameFull') { throw 'gameFull'; }
 
 
       var queryString = `
@@ -318,7 +327,7 @@ module.exports = {
         // call gameInit(4) to initialize with 4 players
         var {unplayedCards, playedCards, currentPlayer, p0Hand, p1Hand, p2Hand, p3Hand} = gameInit(4);
 
-        //convertCardsToTuples formats an array of cards so that it is more terse (tuples)
+        //convertCardsToTuples formats an array of cards so that it is more concise (tuples)
         // making it easier to read in the database
         queryString = `
           UPDATE
@@ -347,10 +356,8 @@ module.exports = {
       rows.response = 'affirmative',
       callback(rows); 
     })
-    .then(insertIntoGamesByUser(userId, gameId, position))
-    .then(callback)
     .catch((err) => {
-      console.log('Caught error:', err);
+      callback(createError(err));
     });
   },
 
@@ -393,7 +400,7 @@ module.exports = {
       callback(rows);
     })
     .catch((err) => {
-      console.log('Caught error', err);
+      callback(createError(err));
     });
   },
 
@@ -503,7 +510,7 @@ module.exports = {
       callback(response);
     })
     .catch((err) => {
-      console.log('Caught error', err);
+      callback(createError(err));
     });
   },
 
