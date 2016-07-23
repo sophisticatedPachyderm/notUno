@@ -204,11 +204,11 @@ module.exports = {
       WHERE
         gameComplete = 0
       AND
-        p0Hand != ${userId}
+        (p0Hand != ${userId} OR p0Hand IS NULL)
       AND
-        p1Hand != ${userId}
+        (p1Hand != ${userId} OR p1Hand IS NULL)
       AND
-        p2Hand != ${userId}
+        (p2Hand != ${userId} OR p2Hand IS NULL)
         ;
       `, true);
     })
