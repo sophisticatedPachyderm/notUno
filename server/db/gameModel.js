@@ -191,6 +191,36 @@ module.exports = {
     // game retrieval
   },
 
+  //get all games that are 'joinable' that i haven't already joined
+  getOpenGames: (userId, callback) => {
+    initPromise({userId: userId})
+    .then(() => { 
+      return promiseQuery(
+      `
+      SELECT
+        *
+      FROM
+        games
+      WHERE
+        gameComplete = 0
+      AND
+        (p0Hand != ${userId} OR p0Hand IS NULL)
+      AND
+        (p1Hand != ${userId} OR p1Hand IS NULL)
+      AND
+        (p2Hand != ${userId} OR p2Hand IS NULL)
+        ;
+      `, true);
+    })
+    .then((rows) => {
+      callback(rows);
+    })
+    .catch((err) => {
+      callback(createError(err));
+    });
+
+  },
+
   allGames: (userId, callback) => {
 
     initPromise({userId: userId})
@@ -396,6 +426,7 @@ module.exports = {
     .then(updateGameState)
     .then((rows) => {
       rows.cardDrawn = cardDrawn;
+      rows.userId = userId;
       rows.response = 'affirmative',
       callback(rows);
     })
@@ -470,7 +501,7 @@ module.exports = {
       //then set currentPlayer
       currentPlayer = getNextPlayer(currentPlayer, direction, playerCount);
 
-      //object is sent to updateGameState
+      //object is sent to updateGameState for the db
       var object = {
         handName: handName,
         myHand: myHand,
@@ -483,13 +514,6 @@ module.exports = {
         },
       };
 
-      if (card[0] === 'takeTwo' || card[0] === 'takeFour') {
-        object.next = {
-          handName: nextHandName,
-          hand: nextHand
-        };
-      }
-
       //response is sent back to client
       response = {
         gameId: gameId,
@@ -498,9 +522,17 @@ module.exports = {
         currentPlayer: currentPlayer,
         direction: direction,
         cardPlayed: card,
-        lastPlayerId: userId,
+        userId: userId,
         gameOver: false
       };
+
+      if (card[0] === 'takeTwo' || card[0] === 'takeFour') {
+        object.next = {
+          handName: nextHandName,
+          hand: nextHand
+        };
+        response.nextHand = nextHand;
+      }
 
       if (myHand.length === 0) { 
         object.options.gameComplete = 2;

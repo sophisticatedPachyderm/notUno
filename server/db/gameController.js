@@ -13,6 +13,13 @@ module.exports = {
     });
   },
 
+  getOpenGames: (req, res) => {
+    gameModel.getOpenGames(req.body.userId, (rows) => {
+      console.log('getOpenGames callback', req.body.userId, rows);
+      res.json(rows);
+    });
+  },
+
   allGames: (req, res) => {
     gameModel.allGames(req.body.userId, (rows) => {
       console.log('allGames callback', req.body.userId, rows);

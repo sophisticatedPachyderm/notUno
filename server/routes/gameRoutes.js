@@ -10,6 +10,11 @@ router.post('/getgame', (req, res) => {
   gameController.getGame(req, res);
 });
 
+router.post('/getopengames', (req, res) => {
+  console.log('POST request for /api/game/getopengames');
+  gameController.getOpenGames(req, res);
+});
+
 router.post('/allgames', (req, res) => {
   console.log('POST request for /api/game/allgames');
   gameController.allGames(req, res);
