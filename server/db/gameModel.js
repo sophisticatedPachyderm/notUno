@@ -38,6 +38,59 @@ const verifyUser = (userId) => {
   });
 };
 
+const gameQueryBasic = (rows) => {
+  return promiseQuery(
+  `
+  SELECT
+    *
+  FROM
+    games
+  WHERE
+    gameId = '${rows.gameId}'
+  LIMIT 1;
+  `, true);
+};
+
+const getStartGameQueryString = (gameId, numPlayers) => {
+  var {unplayedCards, playedCards, currentPlayer, p0Hand, p1Hand, p2Hand, p3Hand} = gameInit(numPlayers);
+  if (p2Hand) { p2Hand = JSON.stringify( convertCardsToTuples(p2Hand) ); }
+  if (p3Hand) { p3Hand = JSON.stringify( convertCardsToTuples(p3Hand) ); }
+
+  var queryString = `
+    UPDATE
+      games
+    SET
+      unplayedCards = '${JSON.stringify( convertCardsToTuples(unplayedCards) )}',
+      playedCards = '${JSON.stringify( convertCardsToTuples(playedCards) )}',
+      currentPlayer = '${ currentPlayer }',
+      p0Hand = '${JSON.stringify( convertCardsToTuples(p0Hand) )}',
+      p1Hand = '${JSON.stringify( convertCardsToTuples(p1Hand) )}',
+      p2Hand = '${p2Hand}',
+      p3Hand = '${p3Hand}',
+      direction = 1,
+      gameComplete = 1
+    WHERE
+      gameId = ${gameId};
+    `;
+
+  return {
+    queryString: queryString,
+    gameState: { 
+      currentPlayer: currentPlayer,
+      unplayedCards: unplayedCards,
+      playedCards: playedCards,
+      p0Hand: p0Hand,
+      p1Hand: p1Hand,
+      p2Hand: p2Hand,
+      p3Hand: p3Hand,
+    }
+  };
+};
+
+const getPlayerCount = (rows) => {
+  var playerCount = rows[0].p1Hand === null ? 1 : rows[0].p2Hand === null ? 2 : rows[0].p3Hand === null ? 3 : 4;
+  return playerCount;
+};
 // get the current state of the game from the dataase and parse / format it
 const getGameState = (userId, gameId) => {
   return promiseQuery(
@@ -121,6 +174,7 @@ const updateGameState = ({handName, myHand, gameId, options, next}) => {
 
 //consistently format errors
 const createError = (err) => {
+  console.log('Error:', err);
   return {
     response: 'negative',
     error: err
@@ -311,6 +365,8 @@ module.exports = {
     userId = Number(userId);
     gameId = Number(gameId);
     //it could be useful to first check if userId exists, before creating any rows
+    var currentPlayer = null;
+    var gameStarted = false;
 
     //select the requested row from games
     initPromise({userId: userId, gameId: gameId})
@@ -363,7 +419,6 @@ module.exports = {
           UPDATE
             games
           SET
-            ${positionName} = ${userId},
             unplayedCards = '${JSON.stringify( convertCardsToTuples(unplayedCards) )}',
             playedCards = '${JSON.stringify( convertCardsToTuples(playedCards) )}',
             currentPlayer = '${ currentPlayer }',
@@ -395,8 +450,27 @@ module.exports = {
     userId = Number(userId);
     gameId = Number(gameId);
 
-    var {unplayedCards, playedCards, currentPlayer, p0Hand, p1Hand, p2Hand, p3Hand} = gameInit(4);
+    initPromise({userId: userId, gameId: gameId})
+    .then(gameQueryBasic)
+    .then((rows) => {
+      if (!rows[0]) { throw 'gameId not found!'; }
+      if (rows[0].gameComplete !== 0) { throw 'Game has already started!'; }
+      if (Number( rows[0].p0Hand ) !== userId) { throw 'You did not create this game!'; }
 
+      console.log('rows:', rows[0]);
+      var playerCount = getPlayerCount(rows);  
+      if (playerCount < 2) { throw 'Cannot start a game with less than 2 players'; }
+
+      var {queryString, gameState} = getStartGameQueryString(gameId, playerCount);
+      console.log('query/gameState:', queryString, gameState);
+      return promiseQuery(queryString, true, {gameState: gameState});
+    })
+    .then((rows) => {
+      callback(rows.options.gameState);
+    })
+    .catch((err) => {
+      callback(createError(err));
+    });
   },
 
   drawCard: (userId, gameId, callback) => {

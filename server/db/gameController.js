@@ -48,9 +48,7 @@ module.exports = {
   },
 
   startGame: (req, res) => {
-    var {userId, gameId} = req.body;
-
-    gameModel.startGame(userId, gameId, (rows) => {
+    gameModel.startGame(req.body.userId, req.body.gameId, (rows) => {
       console.log('startGame complete');
       res.json(rows);
     });

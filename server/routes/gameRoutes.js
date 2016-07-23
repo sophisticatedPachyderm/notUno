@@ -41,7 +41,7 @@ router.post('/joingame', (req, res) => {
 //if the game creator does not want to wait for 4 players.  
 router.post('/startgame', (req, res) => {
   console.log('POST request for /api/game/startgame');
-  gameController.createGame(req, res);
+  gameController.startGame(req, res);
 });
 
 //drawcard for drawing a single card
