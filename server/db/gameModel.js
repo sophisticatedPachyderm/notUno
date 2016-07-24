@@ -284,12 +284,15 @@ module.exports = {
       SELECT
         gu.gameId,
         gu.userId,
-        u.username
+        u.username,
+        g.gameComplete
       FROM
         gamesByUser gu join users u
           on (gu.userId = u.userId)
+          join games g
+          on (g.gameId = gu.gameId)
       WHERE
-        gameId in (SELECT
+        gu.gameId in (SELECT
           gameId
         FROM
           gamesByUser
@@ -306,7 +309,8 @@ module.exports = {
         } else {
           output[row.gameId] = {
             usernameList: [row.username],
-            userIdList: [row.userId]
+            userIdList: [row.userId],
+            gameComplete: row.gameComplete
           };
         }
         return output;
