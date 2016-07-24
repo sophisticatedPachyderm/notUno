@@ -75,7 +75,7 @@ const getStartGameQueryString = (gameId, numPlayers) => {
 
   return {
     queryString: queryString,
-    gameState: { 
+    gameState: {
       currentPlayer: currentPlayer,
       unplayedCards: unplayedCards,
       playedCards: playedCards,
@@ -191,7 +191,7 @@ module.exports = {
 
   getGame: (gameId, callback) => {
     initPromise({gameId: gameId})
-    .then(() => { 
+    .then(() => {
       return promiseQuery(`
       SELECT
         games.*,
@@ -248,15 +248,24 @@ module.exports = {
   //get all games that are 'joinable' that i haven't already joined
   getOpenGames: (userId, callback) => {
     initPromise({userId: userId})
-    .then(() => { 
+    .then(() => {
       return promiseQuery(
       `
       SELECT
-        *
+        games.*,
+        users.username
       FROM
         games
+      INNER JOIN
+        gamesByUser
+      INNER JOIN
+        users
       WHERE
         gameComplete = 0
+      AND
+        users.userId = gamesByUser.userId
+      AND
+        gamesByUser.gameId = games.gameId
       AND
         (p0Hand != ${userId} OR p0Hand IS NULL)
       AND
@@ -278,7 +287,7 @@ module.exports = {
   allGames: (userId, callback) => {
 
     initPromise({userId: userId})
-    .then(() => { 
+    .then(() => {
       return promiseQuery(
       `
       SELECT
@@ -333,7 +342,7 @@ module.exports = {
     // .then(() => {
     //   return verifyUser(userId);
     // })
-    .then(() => { 
+    .then(() => {
       return promiseQuery(`
       INSERT
       INTO
@@ -370,7 +379,7 @@ module.exports = {
 
     //select the requested row from games
     initPromise({userId: userId, gameId: gameId})
-    .then(() => { 
+    .then(() => {
       return promiseQuery(
       `
       SELECT
@@ -437,9 +446,9 @@ module.exports = {
       return promiseQuery(queryString, true, {position: position});
     })
     .then((rows) => { return insertIntoGamesByUser(userId, gameId, rows.options.position); })
-    .then((rows) => { 
+    .then((rows) => {
       rows.response = 'affirmative',
-      callback(rows); 
+      callback(rows);
     })
     .catch((err) => {
       callback(createError(err));
@@ -458,7 +467,7 @@ module.exports = {
       if (Number( rows[0].p0Hand ) !== userId) { throw 'You did not create this game!'; }
 
       console.log('rows:', rows[0]);
-      var playerCount = getPlayerCount(rows);  
+      var playerCount = getPlayerCount(rows);
       if (playerCount < 2) { throw 'Cannot start a game with less than 2 players'; }
 
       var {queryString, gameState} = getStartGameQueryString(gameId, playerCount);
@@ -479,7 +488,7 @@ module.exports = {
     var cardDrawn;
 
     initPromise({userId: userId, gameId: gameId})
-    .then(() => { 
+    .then(() => {
       return getGameState(userId, gameId);
     })
     .then(({unplayedCards, handName, myHand, myPosition, currentPlayer}) => {
@@ -517,7 +526,7 @@ module.exports = {
     var response = {};
 
     initPromise({userId: userId, gameId: gameId})
-    .then(() => { 
+    .then(() => {
       return getGameState(userId, gameId);
     })
     .then(({unplayedCards, playedCards, handName, myHand, myPosition, currentPlayer, direction, playerCount, nextHandName, nextHand}) => {
@@ -608,9 +617,9 @@ module.exports = {
         response.nextHand = nextHand;
       }
 
-      if (myHand.length === 0) { 
+      if (myHand.length === 0) {
         object.options.gameComplete = 2;
-        response.gameOver = true; 
+        response.gameOver = true;
       }
       return object;
 
