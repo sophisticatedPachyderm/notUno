@@ -10,10 +10,14 @@ module.exports = {
   },
 
   getNextPlayer: (currentPlayer, direction, playerCount) => {
-    direction === 1 ? currentPlayer++ : currentPlayer --;
-
-    if (currentPlayer > playerCount) { currentPlayer = 0; }
-    if (currentPlayer < 0) { currentPlayer = playerCount - 1; }
+  
+    if (direction === 1) {  //clockwise, see if you went over
+      currentPlayer++;
+      if (currentPlayer >= playerCount) { currentPlayer = 0; }
+    } else {  //counter clockwise, see if you went under
+      currentPlayer--;
+      if (currentPlayer < 0) { currentPlayer = playerCount - 1; }
+    }
     return currentPlayer;
   }
 };

@@ -117,7 +117,7 @@ const getGameState = (userId, gameId) => {
     var myHand = JSON.parse(rows[0][handName]);
 
     //look at p#Hand to determine how many players
-    var playerCount = rows[0].p2Hand === null ? 2 : rows[0].p3Hand === null ? 3 : 4;
+    var playerCount = rows[0].p2Hand === 'null' ? 2 : rows[0].p3Hand === 'null' ? 3 : 4;
 
     //we need to get the next Hand to handle takeTwo / takeFour cards played at myTurn
     var nextPosition = getNextPlayer(rows[0].currentPlayer, rows[0].direction, playerCount);
