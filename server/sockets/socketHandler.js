@@ -125,16 +125,18 @@ const wsRoutes = {
   },
 
   drawCard: (ws, req) => {
-    var {userId, gameId} = req;
+    // var {userId, gameId} = req;
+    console.log('sent to drawcard websocket server:', req);
 
-    gameModel.drawCard(userId, gameId, (rows) => {
-      console.log('drawCard complete');
+    gameModel.drawCard(req.userId, req.gameId, (rows) => {
+      console.log('drawCard complete', rows);
       //socket call to players in this game showing draw card
       wsBroadcast('drawCardResponse', rows);
     });
   },
 
   myTurn: (ws, req) => {
+    console.log('sent to myturn websocket server:', req);
     gameModel.myTurn(req, (rows) => {
       console.log('myTurn callback', rows, rows.gameOver);
       //socket call to update other players on the changes
