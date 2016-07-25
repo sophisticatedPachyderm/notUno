@@ -147,7 +147,7 @@ const wsRoutes = {
           console.log('Player won, score on db updated');
         });
       }
-      wsBroadcast('drawCardResponse', rows);
+      wsBroadcast('myTurnResponse', rows);
     });
   },
 // ------ USER FUNCTIONS FROM CONTROLLER ------- //
